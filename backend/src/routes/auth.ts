@@ -58,9 +58,11 @@ router.post('/register', async (req: Request, res: Response) => {
 
         await user.save();
 
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) return res.status(500).json({ success: false, message: 'Server misconfiguration.' });
         const token = jwt.sign(
             { id: user._id.toString(), email: user.email, username: user.username, role: user.role },
-            process.env.JWT_SECRET || 'art-community-secret-key-2026',
+            jwtSecret,
             { expiresIn: '7d' }
         );
 
@@ -125,9 +127,11 @@ router.post('/login', async (req: Request, res: Response) => {
             await user.save();
         }
 
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) return res.status(500).json({ success: false, message: 'Server misconfiguration.' });
         const token = jwt.sign(
             { id: user._id.toString(), email: user.email, username: user.username, role: user.role },
-            process.env.JWT_SECRET || 'art-community-secret-key-2026',
+            jwtSecret,
             { expiresIn: '7d' }
         );
 

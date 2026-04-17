@@ -79,14 +79,20 @@ const authLimiter = rateLimit({
 app.use('/api/auth/', authLimiter);
 
 // 5. CORS Hardening
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', process.env.FRONTEND_URL].filter(Boolean) as string[];
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    process.env.FRONTEND_URL
+].filter(Boolean) as string[];
+
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
+        // Allow requests with no origin (mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        // Allow any Vercel preview/production deployment
+        if (origin.endsWith('.vercel.app')) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error('Not allowed by CORS'));
     },
     credentials: true
 }));

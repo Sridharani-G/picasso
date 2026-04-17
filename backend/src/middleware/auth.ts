@@ -24,10 +24,9 @@ export const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
         }
 
         const token = authHeader.replace('Bearer ', '');
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET || 'art-community-secret-key-2026'
-        ) as AuthRequest['user'];
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) throw new Error('JWT_SECRET is not configured.');
+        const decoded = jwt.verify(token, jwtSecret) as AuthRequest['user'];
 
         req.user = decoded;
         next();
@@ -48,10 +47,9 @@ export const optionalAuth = (req: AuthRequest, res: Response, next: NextFunction
         const authHeader = req.header('Authorization');
         if (authHeader && authHeader.startsWith('Bearer ')) {
             const token = authHeader.replace('Bearer ', '');
-            const decoded = jwt.verify(
-                token,
-                process.env.JWT_SECRET || 'art-community-secret-key-2026'
-            ) as AuthRequest['user'];
+            const jwtSecret = process.env.JWT_SECRET;
+            if (!jwtSecret) { next(); return; }
+            const decoded = jwt.verify(token, jwtSecret) as AuthRequest['user'];
 
             req.user = decoded;
         }
