@@ -1,0 +1,22 @@
+{
+  "name": "ArtHub - Global Artist Community",
+  "short_name": "ArtHub",
+  "description": "Connect with artists worldwide, discover amazing artwork, and support creators directly",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
