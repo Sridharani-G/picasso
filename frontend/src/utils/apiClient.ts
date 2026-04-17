@@ -4,20 +4,22 @@
  */
 
 export const getApiUrl = (): string => {
-  if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5007/api';
-  }
-  // On Vercel with experimentalServices, the backend is at /_/backend
-  const isVercel = window.location.hostname.includes('vercel.app');
-  return process.env.NEXT_PUBLIC_API_URL || (isVercel ? '/_/backend/api' : 'http://127.0.0.1:5007/api');
+  // Always use env var if explicitly set
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  // Server-side rendering: use localhost
+  if (typeof window === 'undefined') return 'http://127.0.0.1:5007/api';
+  // Client-side: if on localhost use direct backend, otherwise use Vercel rewrite proxy
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:5007/api'
+    : '/api';
 };
 
 export const getSocketUrl = (): string => {
-  if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_SOCKET_URL || 'http://127.0.0.1:5007';
-  }
-  const isVercel = window.location.hostname.includes('vercel.app');
-  return process.env.NEXT_PUBLIC_SOCKET_URL || (isVercel ? '/_/backend' : 'http://127.0.0.1:5007');
+  if (process.env.NEXT_PUBLIC_SOCKET_URL) return process.env.NEXT_PUBLIC_SOCKET_URL;
+  if (typeof window === 'undefined') return 'http://127.0.0.1:5007';
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:5007'
+    : 'https://picasso-backend.onrender.com';
 };
 
 export const getMediaUrl = (path?: string): string | null => {
