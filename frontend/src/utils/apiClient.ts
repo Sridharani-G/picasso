@@ -7,14 +7,17 @@ export const getApiUrl = (): string => {
   if (typeof window === 'undefined') {
     return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5007/api';
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5007/api';
+  // On Vercel with experimentalServices, the backend is at /_/backend
+  const isVercel = window.location.hostname.includes('vercel.app');
+  return process.env.NEXT_PUBLIC_API_URL || (isVercel ? '/_/backend/api' : 'http://127.0.0.1:5007/api');
 };
 
 export const getSocketUrl = (): string => {
   if (typeof window === 'undefined') {
     return process.env.NEXT_PUBLIC_SOCKET_URL || 'http://127.0.0.1:5007';
   }
-  return process.env.NEXT_PUBLIC_SOCKET_URL || 'http://127.0.0.1:5007';
+  const isVercel = window.location.hostname.includes('vercel.app');
+  return process.env.NEXT_PUBLIC_SOCKET_URL || (isVercel ? '/_/backend' : 'http://127.0.0.1:5007');
 };
 
 export const getMediaUrl = (path?: string): string | null => {
