@@ -24,7 +24,9 @@ const enableInMemoryMongo = process.env.ENABLE_IN_MEMORY_MONGO === 'true';
 let mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 
 if (!mongoUri) {
-    console.error("❌ CRITICAL ERROR: Database connection string is missing! You MUST add MONGO_URI to your environment variables.");
+    console.error("❌ CRITICAL ERROR: Database connection string is missing!");
+    console.error("   Please ensure either 'MONGO_URI' or 'MONGODB_URI' is set in your Render dashboard.");
+    console.error(`   Found keys: ${Object.keys(process.env).filter(k => k.includes('MONGO')).join(', ') || 'NONE'}`);
     process.exit(1);
 }
 

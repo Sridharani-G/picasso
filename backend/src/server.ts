@@ -153,10 +153,17 @@ const PORT = process.env.PORT || 5007;
 
 async function bootstrap() {
     try {
-        console.log('🚀 Booting Picasso Backend v2...');
+        console.log('🚀 Booting Picasso Backend v2 [Deploy: deploy_v2_secrets_fallback_fixed]...');
+        console.log('Environment Diagnostics:');
+        console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
+        console.log(`- PORT: ${process.env.PORT || 5007}`);
+        console.log(`- JWT_SECRET: ${process.env.JWT_SECRET ? 'PRESENT' : 'MISSING (USING FALLBACK)'}`);
+        console.log(`- CLOUDINARY: ${process.env.CLOUDINARY_CLOUD_NAME ? 'CONFIGURED' : 'NOT CONFIGURED'}`);
+        console.log(`- MONGO_URI: ${process.env.MONGODB_URI ? 'PRESENT' : 'MISSING'}`);
         
         const mongoOk = await connectMongoDB();
         if (!mongoOk) {
+            console.error('❌ CRITICAL: MongoDB failure. Exiting.');
             process.exit(1);
         }
 
