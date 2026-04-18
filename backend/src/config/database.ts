@@ -23,13 +23,11 @@ const enableInMemoryMongo = process.env.ENABLE_IN_MEMORY_MONGO === 'true';
 let mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 
 if (!mongoUri) {
-    if (process.env.NODE_ENV === 'production') {
-        console.error("❌ CRITICAL ERROR: Database connection string is missing! You MUST add MONGO_URI to your environment variables in the Render Dashboard.");
-    }
-    mongoUri = 'mongodb://127.0.0.1:27017/picasso';
-} else {
-    mongoUri = mongoUri.replace('localhost', '127.0.0.1');
+    console.error("❌ CRITICAL ERROR: Database connection string is missing! You MUST add MONGO_URI to your environment variables.");
+    process.exit(1);
 }
+
+mongoUri = mongoUri.replace('localhost', '127.0.0.1');
 
 export let mongoConnected = false;
 export let postgresConnected = false;
