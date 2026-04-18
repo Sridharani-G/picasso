@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Chat from '../models/Chat';
+import Message from '../models/Message';
 import User from '../models/User';
 import { auth, AuthRequest } from '../middleware/auth';
 
@@ -28,15 +29,26 @@ router.get('/:chatId', async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
-    const chat = await Chat.findById(req.params.chatId, { messages: { $slice: -50 } })
-      .populate('participants', 'username profileImage role')
-      .populate('messages.sender', 'username profileImage');
+    const chat = await Chat.findById(req.params.chatId)
+      .populate('participants', 'username profileImage role');
+      
     if (!chat) return res.status(404).json({ success: false, message: 'Chat not found' });
+    
     if (!chat.participants.some((participant: any) => participant._id.toString() === userId)) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
-    res.json({ success: true, chat });
+    // Fetch the last 50 messages from the dedicated collection
+    const messages = await Message.find({ chatId: chat._id })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate('sender', 'username profileImage');
+
+    // Return messages in chronological order for the frontend
+    const chatObj = chat.toObject();
+    chatObj.messages = messages.reverse();
+
+    res.json({ success: true, chat: chatObj });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch chat', error: (error as Error).message });
   }
@@ -81,8 +93,12 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     }
 
     await chat.populate('participants', 'username profileImage role');
-    await chat.populate('messages.sender', 'username profileImage');
-    res.status(201).json({ success: true, chat });
+    
+    // For a new chat, return with an empty messages array for frontend compatibility
+    const chatObj = chat.toObject();
+    chatObj.messages = [];
+    
+    res.status(201).json({ success: true, chat: chatObj });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create chat', error: (error as Error).message });
   }
@@ -100,28 +116,39 @@ router.post('/:chatId/messages', async (req: AuthRequest, res: Response) => {
 
     const chat = await Chat.findById(req.params.chatId);
     if (!chat) return res.status(404).json({ success: false, message: 'Chat not found' });
-
+ 
     if (!chat.participants.some((participant) => participant.toString() === userId)) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
-
-    const message = {
+ 
+    // Create new message in the dedicated collection
+    const message = new Message({
+      chatId: chat._id,
       sender: new mongoose.Types.ObjectId(userId),
       content,
       messageType,
       mediaUrl,
       timestamp: new Date(),
       readBy: [new mongoose.Types.ObjectId(userId)]
-    };
-
-    chat.messages.push(message);
+    });
+ 
+    await message.save();
+ 
+    // Update chat metadata
     chat.lastMessage = content || 'Sent a message';
     chat.lastMessageTime = new Date();
     await chat.save();
-
-    await chat.populate('participants', 'username profileImage role');
-    await chat.populate('messages.sender', 'username profileImage');
-    res.status(201).json({ success: true, chat });
+ 
+    // Fetch last 50 messages to return updated state (same format as single chat GET)
+    const messages = await Message.find({ chatId: chat._id })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate('sender', 'username profileImage');
+ 
+    const chatObj = chat.toObject();
+    chatObj.messages = messages.reverse();
+    
+    res.status(201).json({ success: true, chat: chatObj });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to send message', error: (error as Error).message });
   }

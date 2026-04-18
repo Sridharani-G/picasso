@@ -29,6 +29,14 @@ export default function ArtistProfilePage() {
     const router = useRouter();
     const { user: currentUser, token } = useSession();
     const [artist, setArtist] = useState<User | null>(null);
+ 
+    const handleBack = () => {
+        if (typeof window !== 'undefined' && window.history.length > 1 && document.referrer.includes(window.location.host)) {
+            router.back();
+        } else {
+            router.push('/community');
+        }
+    };
 
     const handleMessage = async () => {
         if (!artist) return;
@@ -192,7 +200,7 @@ export default function ArtistProfilePage() {
         <div className="min-h-screen bg-background flex flex-col items-center justify-center text-foreground px-4">
             <h1 className="text-4xl font-serif mb-4 italic tracking-tight uppercase">Artist <span className="text-foreground/20">Not Found</span></h1>
             <button 
-                onClick={() => router.back()} 
+                onClick={handleBack} 
                 className="bg-primary text-primary-foreground px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:scale-105 active:scale-95 transition-all outline-none"
             >
                 Go Back
@@ -231,7 +239,7 @@ export default function ArtistProfilePage() {
                 
                 <div className="absolute top-6 left-6 md:left-12 z-30">
                     <button 
-                        onClick={() => router.back()} 
+                        onClick={handleBack} 
                         className="bg-white/5 backdrop-blur-md border border-white/5 hover:bg-white/10 p-2.5 rounded-xl transition-all group flex items-center gap-3 outline-none"
                     >
                         <ArrowLeftIcon className="w-4 h-4 text-white group-hover:-translate-x-0.5 transition-transform" />

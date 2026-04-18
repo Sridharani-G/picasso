@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useSession } from '@/components/SessionProvider';
 import PageShell from '@/components/ui/PageShell';
 import ChatSidebar from '@/components/chat/ChatSidebar';
@@ -9,11 +10,14 @@ import MessageWindow from '@/components/chat/MessageWindow';
 import { apiFetch } from '@/utils/apiClient';
 import { Chat } from '@/types';
 
-export default function ChatPage() {
+export function ChatContent() {
   const { user, isLoggedIn, token } = useSession();
+  const searchParams = useSearchParams();
+  const chatIdFromUrl = searchParams.get('id');
+  
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [activeChatId, setActiveChatId] = useState<string | null>(chatIdFromUrl);
   const [messageText, setMessageText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -31,8 +35,13 @@ export default function ChatPage() {
       }
       const mappedChats = (body.chats || []).map((c: any) => ({ ...c, id: c.id || c._id }));
       setChats(mappedChats);
+      
+      // If we don't have an active chat ID yet (no URL param), pick the first one
       if (mappedChats.length > 0) {
-        setActiveChatId((prev) => prev || mappedChats[0].id);
+        setActiveChatId((prev) => {
+            if (prev) return prev;
+            return mappedChats[0].id;
+        });
       }
     } catch (err: any) {
       setError(err?.message || 'Unable to load chats');
@@ -155,5 +164,13 @@ export default function ChatPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-foreground/40">Initializing Chat...</div>}>
+      <ChatContent />
+    </Suspense>
   );
 }
