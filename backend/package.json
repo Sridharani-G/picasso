@@ -5,6 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
+    "postinstall": "npm run build",
     "start": "node dist/server.js",
     "dev": "nodemon --exec \"node --use-system-ca --max-old-space-size=4096 -r ts-node/register\" src/server.ts",
     "seed": "node -r ts-node/register src/seed_all.ts",
