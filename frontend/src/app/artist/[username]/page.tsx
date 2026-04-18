@@ -83,24 +83,24 @@ export default function ArtistProfilePage() {
     useEffect(() => {
         const fetchArtistData = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const apiUrl = getApiUrl();
-                const response = await fetch(`${apiUrl}/users/username/${encodeURIComponent(String(username))}`, {
-                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-                });
+                const response = await apiFetch(`/users/username/${encodeURIComponent(String(username))}`);
                 if (!response.ok) throw new Error('Artist not found');
                 const data = await response.json();
+                
                 setArtist(data.user);
                 setTrendVotes(data.user.trendVotes || 0);
                 setHasVoted(!!data.user.hasVoted);
                 setIsFollowing(data.user.isFollowing || false);
-                const artworkResponse = await fetch(`${apiUrl}/users/${data.user.id}/artworks`);
+                
+                const artworkResponse = await apiFetch(`/users/${data.user.id}/artworks`);
                 if (artworkResponse.ok) {
                     const artworkData = await artworkResponse.json();
                     setArtworks(artworkData.artworks || []);
                 }
+                
+                const { user: currentUser } = SessionManager.getUser() || {};
                 if (data.user && currentUser?.id !== data.user.id) {
-                    fetch(`${apiUrl}/users/${data.user.id}/visit`, { method: 'POST' }).catch(() => { });
+                    apiFetch(`/users/${data.user.id}/visit`, { method: 'POST' }).catch(() => { });
                 }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -152,9 +152,8 @@ export default function ArtistProfilePage() {
     const handleTrend = async () => {
         if (!artist || !currentUser) return;
         try {
-            const response = await fetch(`${getApiUrl()}/users/${artist.id}/trend`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SessionManager.getToken()}` }
+            const response = await apiFetch(`/users/${artist.id}/trend`, {
+                method: 'POST'
             });
             if (response.ok) { const data = await response.json(); setArtist(data.user); }
         } catch (err) { console.error('Failed to set trending status:', err); }
@@ -164,9 +163,8 @@ export default function ArtistProfilePage() {
         if (!artist) return;
         if (!currentUser) { router.push('/auth/login'); return; }
         try {
-            const response = await fetch(`${getApiUrl()}/users/${artist.id}/vote-trend`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SessionManager.getToken()}` }
+            const response = await apiFetch(`/users/${artist.id}/vote-trend`, {
+                method: 'POST'
             });
             if (response.ok) {
                 setTrendVotes(prev => prev + 1);
@@ -184,7 +182,7 @@ export default function ArtistProfilePage() {
         setModalOpen(true);
         setModalLoading(true);
         try {
-            const response = await fetch(`${getApiUrl()}/users/${artist.id || (artist as any)._id}/${type}`);
+            const response = await apiFetch(`/users/${artist.id || (artist as any)._id}/${type}`);
             if (response.ok) { const data = await response.json(); setModalUsers(data[type] || []); }
         } catch (err) { console.error('Failed to fetch user list:', err); }
         finally { setModalLoading(false); }

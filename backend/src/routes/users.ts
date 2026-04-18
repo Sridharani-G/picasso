@@ -320,7 +320,7 @@ router.get('/artists', optionalAuth, async (req: AuthRequest, res: Response) => 
                 categories: artist.categories,
                 followersCount: artist.followers.length,
                 followingCount: artist.following.length,
-                isFollowing: req.user ? artist.followers.some((f: any) => f._id.toString() === req.user!.id) : false,
+                isFollowing: req.user ? artist.followers.some((f: any) => (f._id || f).toString() === req.user!.id) : false,
                 badges: artist.badges,
                 isVerified: artist.isVerified,
                 isArtist: true,
@@ -355,7 +355,7 @@ router.get('/username/:username', optionalAuth, async (req: AuthRequest, res: Re
 
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-        const isFollowing = req.user ? user.followers.some(f => f._id.toString() === req.user!.id) : false;
+        const isFollowing = req.user ? user.followers.some(f => (f._id || f).toString() === req.user!.id) : false;
 
         const artworkStats = await Artwork.aggregate([
             { $match: { artist: user._id } },
@@ -407,7 +407,7 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res: Response) => {
         const user = await User.findById(req.params.id).populate('followers following', 'username profileImage bio');
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-        const isFollowing = req.user ? user.followers.some(f => f._id.toString() === req.user!.id) : false;
+        const isFollowing = req.user ? user.followers.some(f => (f._id || f).toString() === req.user!.id) : false;
 
         const artworkStats = await Artwork.aggregate([
             { $match: { artist: user._id } },
