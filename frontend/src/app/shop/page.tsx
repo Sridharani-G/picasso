@@ -32,7 +32,7 @@ export default function ShopPage() {
             `${apiUrl}/artworks/categories`,
             '/api/artworks/categories',
             `${window.location.origin}/api/artworks/categories`,
-            'http://localhost:5000/api/artworks/categories'
+            `${process.env.NEXT_PUBLIC_API_URL}/api/artworks/categories`
         ];
 
         for (const endpoint of candidates) {
@@ -73,7 +73,7 @@ export default function ShopPage() {
             `${apiUrl}/artworks/styles`,
             '/api/artworks/styles',
             `${window.location.origin}/api/artworks/styles`,
-            'http://localhost:5000/api/artworks/styles'
+            `${process.env.NEXT_PUBLIC_API_URL}/api/artworks/styles`
         ];
 
         for (const endpoint of candidates) {
@@ -102,7 +102,7 @@ export default function ShopPage() {
                 `${base}${filterStr}`,
                 `/api/artworks?isForSale=true&limit=24${filterStr}`,
                 `${window.location.origin}/api/artworks?isForSale=true&limit=24${filterStr}`,
-                `http://localhost:5000/api/artworks?isForSale=true&limit=24${filterStr}`
+                `${process.env.NEXT_PUBLIC_API_URL}/api/artworks?isForSale=true&limit=24${filterStr}`
             ];
 
             let resolved = false;
