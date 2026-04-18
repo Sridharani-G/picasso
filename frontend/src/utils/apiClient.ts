@@ -4,26 +4,15 @@
  */
 
 export const getApiUrl = (): string => {
-  // Client-side production: force strict relative `/api` rewrite proxy to avoid CORS and env configuration errors
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return '/api';
-  }
-
-  // Fallback / Local Development
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    const url = process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
-    return url.endsWith('/api') ? url : `${url}/api`;
-  }
-  
-  return 'http://127.0.0.1:5007/api';
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5007';
+  const url = envUrl.replace(/\/$/, '');
+  return url.endsWith('/api') ? url : `${url}/api`;
 };
 
 export const getSocketUrl = (): string => {
   if (process.env.NEXT_PUBLIC_SOCKET_URL) return process.env.NEXT_PUBLIC_SOCKET_URL;
-  if (typeof window === 'undefined') return 'http://127.0.0.1:5007';
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://127.0.0.1:5007'
-    : 'https://picasso-backend.onrender.com';
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5007';
+  return envUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
 };
 
 export const getMediaUrl = (path?: string): string | null => {
