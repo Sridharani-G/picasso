@@ -1,6 +1,6 @@
 {
   "name": "art-community-backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Backend for Global Artist Community Platform",
   "main": "dist/server.js",
   "scripts": {
