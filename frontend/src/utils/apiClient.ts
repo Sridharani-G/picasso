@@ -4,14 +4,18 @@
  */
 
 export const getApiUrl = (): string => {
-  // Always use env var if explicitly set
-  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
-  // Server-side rendering: use localhost
-  if (typeof window === 'undefined') return 'http://127.0.0.1:5007/api';
-  // Client-side: if on localhost use direct backend, otherwise use Vercel rewrite proxy
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://127.0.0.1:5007/api'
-    : '/api';
+  // Client-side production: force strict relative `/api` rewrite proxy to avoid CORS and env configuration errors
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
+  }
+
+  // Fallback / Local Development
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    const url = process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+    return url.endsWith('/api') ? url : `${url}/api`;
+  }
+  
+  return 'http://127.0.0.1:5007/api';
 };
 
 export const getSocketUrl = (): string => {
