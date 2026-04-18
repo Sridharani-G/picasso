@@ -8,7 +8,27 @@ import PageShell from '@/components/ui/PageShell';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import MessageWindow from '@/components/chat/MessageWindow';
 import { apiFetch } from '@/utils/apiClient';
-import { Chat } from '@/types';
+import { Chat, ChatMessage } from '@/types';
+ 
+const mapChatData = (chat: any) => {
+  if (!chat) return null;
+  return {
+    ...chat,
+    id: chat.id || chat._id,
+    participants: (chat.participants || []).map((p: any) => ({
+      ...p,
+      id: p.id || p._id
+    })),
+    messages: (chat.messages || []).map((m: any) => ({
+      ...m,
+      id: m.id || m._id,
+      sender: typeof m.sender === 'object' ? {
+        ...m.sender,
+        id: m.sender.id || m.sender._id
+      } : m.sender
+    }))
+  };
+};
 
 export function ChatContent() {
   const { user, isLoggedIn, token } = useSession();
@@ -33,14 +53,14 @@ export function ChatContent() {
       if (!response.ok) {
         throw new Error(body?.message || 'Failed to load chats');
       }
-      const mappedChats = (body.chats || []).map((c: any) => ({ ...c, id: c.id || c._id }));
+      const mappedChats = (body.chats || []).map(mapChatData).filter(Boolean);
       setChats(mappedChats);
       
       // If we don't have an active chat ID yet (no URL param), pick the first one
       if (mappedChats.length > 0) {
         setActiveChatId((prev) => {
             if (prev) return prev;
-            return mappedChats[0].id;
+            return (mappedChats[0] as any).id;
         });
       }
     } catch (err: any) {
@@ -60,8 +80,8 @@ export function ChatContent() {
       if (!response.ok) {
         throw new Error(body?.message || 'Failed to load conversation');
       }
-      const mappedChat = { ...body.chat, id: body.chat.id || body.chat._id };
-      setActiveChat(mappedChat);
+      const mappedChat = mapChatData(body.chat);
+      setActiveChat(mappedChat as any);
     } catch (err: any) {
       setError(err?.message || 'Unable to load conversation');
     } finally {
@@ -103,9 +123,9 @@ export function ChatContent() {
       if (!response.ok) {
         throw new Error(body?.message || 'Failed to send message');
       }
-      const mappedChat = { ...body.chat, id: body.chat.id || body.chat._id };
-      setActiveChat(mappedChat);
-      setChats((prev) => prev.map((chat) => (chat.id === mappedChat.id ? mappedChat : chat)));
+      const mappedChat = mapChatData(body.chat);
+      setActiveChat(mappedChat as any);
+      setChats((prev) => prev.map((chat) => (chat.id === (mappedChat as any).id ? (mappedChat as any) : chat)));
       if (!overrideContent) setMessageText('');
     } catch (err: any) {
       setError(err?.message || 'Unable to send message');

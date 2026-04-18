@@ -19,7 +19,25 @@ const MessageSchema = new Schema<MessageDocument>({
   timestamp: { type: Date, default: Date.now },
   readBy: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform: function(doc, ret) {
+      ret.id = ret._id?.toString() || ret.id;
+      delete ret._id;
+      delete ret.__v;
+      return ret;
+    }
+  },
+  toObject: {
+    virtuals: true,
+    transform: function(doc, ret) {
+      ret.id = ret._id?.toString() || ret.id;
+      delete ret._id;
+      delete ret.__v;
+      return ret;
+    }
+  }
 });
  
 // Critical indices for performance
