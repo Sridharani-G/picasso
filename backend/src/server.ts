@@ -108,9 +108,20 @@ app.use(express.urlencoded({ extended: true, limit: '300mb' }));
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'ok', 
-        mongoDB: mongoConnected, 
-        postgres: postgresConnected,
-        cloudinary: cloudinaryConnected 
+        service: 'picasso-backend',
+        deploy_id: 'deploy_v2_secrets_fallback_fixed',
+        timestamp: new Date().toISOString(),
+        config: {
+            hasJwtSecret: !!process.env.JWT_SECRET,
+            hasCloudinary: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY),
+            hasMongoUri: !!process.env.MONGODB_URI,
+            nodeEnv: process.env.NODE_ENV
+        },
+        connections: {
+            mongoDB: mongoConnected, 
+            postgres: postgresConnected,
+            cloudinary: cloudinaryConnected 
+        }
     });
 });
 
