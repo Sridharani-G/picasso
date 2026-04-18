@@ -4,6 +4,14 @@ import path from "path";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://picasso-backend.onrender.com/api/:path*',
+      },
+    ];
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
