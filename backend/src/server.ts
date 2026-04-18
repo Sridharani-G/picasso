@@ -4,10 +4,11 @@ import dns from 'node:dns';
 // This MUST happen before any database connections are attempted
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
-import dotenv from 'dotenv';
 import path from 'path';
-// Load .env FIRST before any other imports that might read env vars
-dotenv.config({ path: path.join(__dirname, '../.env'), override: true });
+// Load .env ONLY in non-production environments to prevent Render/Vercel crashing on missing dev dependencies
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config({ path: path.join(__dirname, '../.env'), override: true });
+}
 
 import express from 'express';
 import cors from 'cors';

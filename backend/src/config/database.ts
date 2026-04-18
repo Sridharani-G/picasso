@@ -1,8 +1,9 @@
-import dotenv from 'dotenv';
 import path from 'path';
 
-// Load .env FIRST before mongoose or other env-dependent modules
-dotenv.config({ path: path.join(__dirname, '../../.env'), override: true });
+// Load .env FIRST before mongoose or other env-dependent modules ONLY in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config({ path: path.join(__dirname, '../../.env'), override: true });
+}
 
 import mongoose from 'mongoose';
 import { Pool } from 'pg';
