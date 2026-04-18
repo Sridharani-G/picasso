@@ -12,6 +12,7 @@ interface MessageWindowProps {
   setMessageText: (value: string) => void;
   onSend: (override?: string) => void;
   isSending: boolean;
+  isLoading?: boolean;
 }
 
 const COMMON_EMOJIS = ['😊', '😂', '🔥', '❤️', '👍', '✨', '🎨', '📸', '🙌', '💡'];
@@ -20,10 +21,29 @@ const getInitials = (name: string) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 };
 
-export default function MessageWindow({ chat, currentUserId, messageText, setMessageText, onSend, isSending }: MessageWindowProps) {
+export default function MessageWindow({ chat, currentUserId, messageText, setMessageText, onSend, isSending, isLoading }: MessageWindowProps) {
   const [showEmoji, setShowEmoji] = useState(false);
   const [showGifs, setShowGifs] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full flex-col bg-white overflow-hidden animate-pulse">
+        <div className="px-8 py-6 border-b border-slate-50 flex items-center gap-4 flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-[#E5E9F0]" />
+          <div className="flex flex-col gap-2">
+            <div className="w-32 h-4 bg-slate-100 rounded-lg" />
+            <div className="w-20 h-3 bg-slate-50 rounded-lg" />
+          </div>
+        </div>
+        <div className="flex-1 px-8 py-10 space-y-8 flex flex-col">
+          <div className="self-start w-2/3 h-12 bg-slate-50 rounded-2xl" />
+          <div className="self-end w-1/2 h-12 bg-[#F0F2F5] rounded-2xl" />
+          <div className="self-start w-1/3 h-12 bg-slate-50 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   if (!chat) {
     return (

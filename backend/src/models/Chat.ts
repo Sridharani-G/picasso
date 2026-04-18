@@ -38,4 +38,7 @@ const ChatSchema = new Schema<ChatDocument>({
   timestamps: true
 });
 
+ChatSchema.index({ participants: 1 });
+ChatSchema.index({ lastMessageTime: -1 });
+
 export default mongoose.models.Chat || mongoose.model<ChatDocument>('Chat', ChatSchema);

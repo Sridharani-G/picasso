@@ -13,8 +13,8 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
     const chats = await Chat.find({ participants: userId })
+      .select('-messages')
       .populate('participants', 'username profileImage role')
-      .populate('messages.sender', 'username profileImage')
       .sort({ lastMessageTime: -1 });
 
     res.json({ success: true, chats });
@@ -28,7 +28,7 @@ router.get('/:chatId', async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
-    const chat = await Chat.findById(req.params.chatId)
+    const chat = await Chat.findById(req.params.chatId, { messages: { $slice: -50 } })
       .populate('participants', 'username profileImage role')
       .populate('messages.sender', 'username profileImage');
     if (!chat) return res.status(404).json({ success: false, message: 'Chat not found' });

@@ -17,6 +17,7 @@ export default function ChatPage() {
   const [messageText, setMessageText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadChats = async () => {
@@ -42,6 +43,8 @@ export default function ChatPage() {
 
   const loadActiveChat = async (chatId: string) => {
     if (!token) return;
+    setIsChatLoading(true);
+    setError(null);
     try {
       const response = await apiFetch(`/chats/${chatId}`, { token });
       const body = await response.json();
@@ -52,6 +55,8 @@ export default function ChatPage() {
       setActiveChat(mappedChat);
     } catch (err: any) {
       setError(err?.message || 'Unable to load conversation');
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
@@ -67,7 +72,11 @@ export default function ChatPage() {
   }, [activeChatId, token]);
 
   const handleSelectChat = (chatId: string) => {
+    if (chatId === activeChatId) return;
     setActiveChatId(chatId);
+    setActiveChat(null);
+    setMessageText('');
+    setIsChatLoading(true);
   };
 
   const handleSendMessage = async (overrideContent?: string) => {
@@ -141,6 +150,7 @@ export default function ChatPage() {
             setMessageText={setMessageText}
             onSend={handleSendMessage}
             isSending={isSending}
+            isLoading={isChatLoading}
           />
         )}
       </div>
