@@ -3,7 +3,6 @@ import mongoose, { Schema, Types, Document } from 'mongoose';
 
 export interface ChatDocument extends Document {
   participants: Types.ObjectId[];
-  participants: Types.ObjectId[];
   isGroup: boolean;
   groupName?: string;
   lastMessage: string;
